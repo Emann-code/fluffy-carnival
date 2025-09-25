@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Shooting Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #87CEEB 0%, #4169E1 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(180deg, #87CEEB 0%, #32CD32 70%);
+        }
+
+        #court {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(90deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            border-top: 5px solid #654321;
+        }
+
+        #hoop {
+            position: absolute;
+            top: 20%;
+            right: 10%;
+            width: 120px;
+            height: 80px;
+        }
+
+        #backboard {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 15px;
+            height: 80px;
+            background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+            border: 2px solid #ccc;
+            border-radius: 2px;
+        }
+
+        #rim {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 80px;
+            height: 8px;
+            background: #FF4500;
+            border-radius: 4px;
+            border: 2px solid #FF6500;
+        }
+
+        #net {
+            position: absolute;
+            bottom: 7px;
+            right: 20px;
+            width: 70px;
+            height: 40px;
+            border-left: 2px solid #fff;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            border-bottom-left-radius: 35px;
+            border-bottom-right-radius: 35px;
+        }
+
+        #net::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 15px;
+            width: 2px;
+            height: 35px;
+            background: #fff;
+        }
+
+        #net::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 15px;
+            width: 2px;
+            height: 35px;
+            background: #fff;
+        }
+
+        #ball {
+            position: absolute;
+            bottom: 200px;
+            left: 100px;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #FF8C00 0%, #FF4500 70%);
+            border-radius: 50%;
+            border: 2px solid #FF6500;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            z-index: 10;
+        }
+
+        #ball::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -2px;
+            right: -2px;
+            height: 2px;
+            background: #8B0000;
+            transform: translateY(-50%);
+        }
+
+        #ball::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: -2px;
+            bottom: -2px;
+            width: 2px;
+            background: #8B0000;
+            transform: translateX(-50%);
+        }
+
+        #ball:hover {
+            transform: scale(1.1);
+            filter: brightness(1.1);
+        }
+
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #powerMeter {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 200px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 2px solid #fff;
+        }
+
+        #powerBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00FF00 0%, #FFFF00 50%, #FF0000 100%);
+            border-radius: 8px;
+            transition: width 0.1s ease;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #fff;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .shooting {
+            animation: ballFly 2s ease-out forwards;
+        }
+
+        @keyframes ballFly {
+            0% { 
+                transform: translate(0, 0) scale(1); 
+            }
+            50% { 
+                transform: translate(var(--dx), var(--dy)) scale(0.8); 
+            }
+            100% { 
+                transform: translate(var(--target-x), var(--target-y)) scale(0.6); 
+            }
+        }
+
+        .score-popup {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            animation: scoreFloat 1.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        @keyframes scoreFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="court"></div>
+        
+        <div id="hoop">
+            <div id="backboard"></div>
+            <div id="rim"></div>
+            <div id="net"></div>
+        </div>
+
+        <div id="ball"></div>
+
+        <div id="scoreBoard">
+            <div>Score: <span id="score">0</span></div>
+            <div>Shots: <span id="shots">0</span></div>
+        </div>
+
+        <div id="powerMeter">
+            <div id="powerBar"></div>
+        </div>
+
+        <div id="instructions">
+            Click and hold the ball to aim and build power, then release to shoot!
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let shots = 0;
+        let isCharging = false;
+        let isShooting = false;
+        let power = 0;
+        let powerInterval;
+        let startX, startY;
+
+        const ball = document.getElementById('ball');
+        const powerBar = document.getElementById('powerBar');
+        const scoreElement = document.getElementById('score');
+        const shotsElement = document.getElementById('shots');
+        const hoop = document.getElementById('hoop');
+
+        // Get hoop position for scoring
+        function getHoopCenter() {
+            const hoopRect = hoop.getBoundingClientRect();
+            const rimRect = document.getElementById('rim').getBoundingClientRect();
+            return {
+                x: rimRect.left + rimRect.width / 2,
+                y: rimRect.top + rimRect.height / 2
+            };
+        }
+
+        // Mouse events for shooting
+        ball.addEventListener('mousedown', startCharging);
+        document.addEventListener('mouseup', shoot);
+        document.addEventListener('mousemove', updateAim);
+
+        function startCharging(e) {
+            if (isShooting) return;
+            
+            isCharging = true;
+            power = 0;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            powerInterval = setInterval(() => {
+                if (power < 100) {
+                    power += 2;
+                    powerBar.style.width = power + '%';
+                }
+            }, 50);
+        }
+
+        function updateAim(e) {
+            if (!isCharging || isShooting) return;
+            
+            // Visual feedback could be added here for aiming
+        }
+
+        function shoot(e) {
+            if (!isCharging || isShooting) return;
+            
+            isCharging = false;
+            isShooting = true;
+            clearInterval(powerInterval);
+            
+            shots++;
+            shotsElement.textContent = shots;
+            
+            const ballRect = ball.getBoundingClientRect();
+            const hoopCenter = getHoopCenter();
+            
+            // Calculate trajectory based on mouse position and power
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            // Adjust trajectory with power
+            const powerMultiplier = power / 100;
+            const targetX = hoopCenter.x - ballRect.left - ballRect.width / 2 + (deltaX * powerMultiplier * 0.5);
+            const targetY = hoopCenter.y - ballRect.top - ballRect.height / 2 + (deltaY * powerMultiplier * 0.3);
+            
+            // Set CSS variables for animation
+            ball.style.setProperty('--dx', (targetX * 0.5) + 'px');
+            ball.style.setProperty('--dy', (targetY * 0.3 - 100) + 'px');
+            ball.style.setProperty('--target-x', targetX + 'px');
+            ball.style.setProperty('--target-y', targetY + 'px');
+            
+            ball.classList.add('shooting');
+            
+            // Check for score after animation
+            setTimeout(() => {
+                checkScore(ballRect, hoopCenter, targetX, targetY);
+                resetBall();
+            }, 2000);
+        }
+
+        function checkScore(ballRect, hoopCenter, targetX, targetY) {
+            const finalBallX = ballRect.left + targetX;
+            const finalBallY = ballRect.top + targetY;
+            
+            const distance = Math.sqrt(
+                Math.pow(finalBallX - hoopCenter.x, 2) + 
+                Math.pow(finalBallY - hoopCenter.y, 2)
+            );
+            
+            // Score if ball is close enough to hoop
+            if (distance < 60) {
+                score += 2;
+                scoreElement.textContent = score;
+                showScorePopup(hoopCenter.x, hoopCenter.y, '+2');
+                
+                // Bonus points for perfect shots
+                if (distance < 30) {
+                    score += 1;
+                    scoreElement.textContent = score;
+                    showScorePopup(hoopCenter.x, hoopCenter.y + 30, 'PERFECT! +1');
+                }
+            }
+        }
+
+        function showScorePopup(x, y, text) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = text;
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                popup.remove();
+            }, 1500);
+        }
+
+        function resetBall() {
+            setTimeout(() => {
+                ball.classList.remove('shooting');
+                ball.style.transform = '';
+                powerBar.style.width = '0%';
+                power = 0;
+                isShooting = false;
+                
+                // Reset ball position with some variation
+                ball.style.left = (50 + Math.random() * 100) + 'px';
+                ball.style.bottom = (200 + Math.random() * 50) + 'px';
+            }, 100);
+        }
+
+        // Prevent context menu on right click
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Touch support for mobile
+        ball.addEventListener('touchstart', handleTouch);
+        document.addEventListener('touchend', handleTouchEnd);
+        document.addEventListener('touchmove', handleTouchMove);
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            startCharging({clientX: touch.clientX, clientY: touch.clientY});
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            shoot({clientX: touch.clientX, clientY: touch.clientY});
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            updateAim({clientX: touch.clientX, clientY: touch.clientY});
+        }
+    </script>
+</body>
+</html>

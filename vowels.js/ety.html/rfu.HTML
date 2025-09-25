@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Toggle Container</title>
+  <style>
+    #container {
+      background-color: lightgray;
+      color: black;
+      padding: 20px;
+      width: 200px;
+      text-align: center;
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">Wassup My G</div>
+  <button onclick="toggleTheme()">Toggle</button>
+
+  <script>
+    function toggleTheme() {
+      let box = document.getElementById("container");
+      if (box.style.backgroundColor === "black") {
+        box.style.backgroundColor = "lightgray";
+        box.style.color = "black";
+      } else {
+        box.style.backgroundColor = "black";
+        box.style.color = "white";
+      }
+    }
+  </script>
+</body>
+</html>
